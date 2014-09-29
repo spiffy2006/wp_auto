@@ -20,6 +20,13 @@
                 margin-top: 20px;
             }
         </style>
+        <script type="text/javascript">
+            window.onload = function() {
+                document.getElementById('submit').addEventListener('click', function() {
+                    alert("Don't click the button again. The script is working.");
+                });
+            };
+        </script>
     </head>
     <body>
 <?php
@@ -39,7 +46,7 @@ if (isset($_POST['submit'])) :
         
         //Set all variables
         $db_name = 'wf' . (count($wfs) + 2); //+2 to account for theme-test which isn't normal naming convention
-        $db_user = 'root';
+        $db_user = '';
         $db_pass = '';
         $site_title = 'SiteTitle';
         $user_name = 'user';
@@ -66,7 +73,25 @@ if (isset($_POST['submit'])) :
 
 
 /* =Theme customization starts here
--------------------------------------------------------------- */';
+-------------------------------------------------------------- */
+
+/*----------Header----------*/
+
+
+/*----------Nav----------*/
+
+
+/*----------Body----------*/
+
+
+/*----------Sub-pages----------*/
+
+
+/*----------Footer----------*/
+
+
+/*----------Do not edit below this line----------*/
+';
         file_put_contents($db_name . '/wp-content/themes/' . $child_theme . '/style.css', $css);
         
         try {
@@ -86,6 +111,30 @@ if (isset($_POST['submit'])) :
         
         //Finish Site Set Up
         exec("curl --data 'weblog_title=$site_title&user_name=$user_name&admin_password=$admin_pass&admin_password2=$admin_pass&admin_email=$email&blog_public=0' http://wf.stageops.com/$db_name/wp-admin/install.php?step=2");
+        
+        //Update wordpress options: current theme, sidebar widgets, and active plugins
+        require_once($db_name . '/wp-load.php');
+        
+        update_option('current_theme', $child_theme);
+        
+        $sidebars = maybe_unserialize( get_option('sidebars_widgets') );
+        foreach( $sidebars as $k => $v ) {
+            if ($k == 'sidebar-1' || $k == 'primary') {
+                $sidebars[$k] = array('archives-2');
+            }
+        }
+        
+        update_option('template', $theme_name);
+        update_option('sidebars_widgets', $sidebars);
+        
+        $plugin_paths = array(
+            'advanced-code-editor/advanced-code-editor.php',
+            'wordpress-seo/wp-seo.php',
+            'wp-super-cache/wp-cache.php'
+        );
+        
+        update_option('active_plugins', $plugin_paths);
+        
         echo '<a href="http://wf.stageops.com/' . $db_name . '/wp-admin" target="_blank">Login to new wireframe</a>';
     }
 else: ?>
